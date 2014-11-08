@@ -9,7 +9,7 @@
 #import "ViewController.h"
 #import "NFXPermissionViewController.h"
 
-@interface ViewController ()<NFXPermissionViewControllerDelegate>
+@interface ViewController () <NFXPermissionViewControllerDelegate>
 
 @end
 
@@ -26,14 +26,17 @@
 
 
 - (IBAction)ButtonPushed:(UIButton*)sender {
-    NFXPermissionViewController*vc = [[NFXPermissionViewController alloc] initWithType:(NFXPermissionType)sender.tag];
+    
+    NFXPermissionViewController*vc = [[NFXPermissionViewController alloc] initWithType:(NFXPermissionType)sender.tag customDescription:@"This app needs this permission to run."];
     vc.delegate = self;
     [self presentViewController:vc animated:true completion:nil];
 }
 
+
 -(void)NFXPermissionViewController:(NFXPermissionViewController *)NFXPermissionViewController accept:(BOOL)accept{
     [NFXPermissionViewController dismissViewControllerAnimated:true completion:^{
         NSLog(@"%@",accept?@"true":@"false");
+        
     }];
 }
 

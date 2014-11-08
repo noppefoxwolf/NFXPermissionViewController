@@ -22,9 +22,8 @@ typedef enum : NSUInteger {
 @end
 
 @interface NFXPermissionViewController : UIViewController
--(id)initWithType:(NFXPermissionType)type;
+-(id)initWithType:(NFXPermissionType)type customDescription:(NSString *)customDescription;
 
 @property (nonatomic,copy)   NSString*permission_title;
-@property (nonatomic,copy)   NSString*permission_description;
 @property (nonatomic,assign) id<NFXPermissionViewControllerDelegate>delegate;
 @end
