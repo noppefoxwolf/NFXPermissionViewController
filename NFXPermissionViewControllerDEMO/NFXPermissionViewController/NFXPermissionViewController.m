@@ -15,6 +15,7 @@
 
 @interface NFXPermissionViewController (){
     NFXPermissionType type_;
+    NSString* permission_description_;
     UIImageView*app_iv;
     UIImageView*permisson_iv;
     UILabel*title_lbl;
@@ -25,14 +26,26 @@
 
 @implementation NFXPermissionViewController
 
--(id)initWithType:(NFXPermissionType)type{
+-(id)initWithType:(NFXPermissionType)type customDescription:(NSString *)customDescription{
     self = [super init];
     if (self) {
+        permission_description_ = customDescription;
         type_ = type;
         [self setup];
     }
     return self;
 }
+
+
+-(id)initWithPermissionGroup:(NSArray *)permissionGroup {
+    self = [super init];
+    if (self) {
+        
+      [self setup];
+    }
+    return self;
+}
+
 
 -(void)setup{
     self.view.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1];
@@ -58,29 +71,48 @@
     app_iv.image = [UIImage imageNamed:@"120x120.png"];
     app_iv.clipsToBounds = true;
     [self.view addSubview:app_iv];
+
     
-    CGPoint btncenter = self.view.center;
-    CGRect  btnrect   = CGRectMake(0, 0, 200, 44);
-    btncenter.y = self.view.bounds.size.height - 66;
-    UIButton*btn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [btn setBackgroundImage:createImageFromUIColor([UIColor whiteColor]) forState:UIControlStateNormal];
-    [btn setBackgroundImage:createImageFromUIColor([UIColor lightGrayColor]) forState:UIControlStateHighlighted];
-    [btn setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
-    [btn setTitle:@"Accept" forState:UIControlStateNormal];
-    [btn addTarget:self action:@selector(buttonpushed:) forControlEvents:UIControlEventTouchUpInside];
-    btn.frame = btnrect;
-    btn.center = btncenter;
-    btn.layer.cornerRadius = 5;
-    btn.layer.borderColor = [UIColor lightGrayColor].CGColor;
-    btn.layer.borderWidth = 0.5;
-    btn.clipsToBounds = true;
-    [self.view addSubview:btn];
+    CGFloat const MARGIN_X = 10;
+    CGFloat const MARGIN_Y = self.view.bounds.size.height - 100;
+    CGFloat const BUTTON_WIDTH = 150;
+    CGFloat viewCenter = self.view.center.x;
+    
+    UIButton*btnAccept = [UIButton buttonWithType:UIButtonTypeCustom];
+    [btnAccept setBackgroundImage:createImageFromUIColor([UIColor whiteColor]) forState:UIControlStateNormal];
+    [btnAccept setBackgroundImage:createImageFromUIColor([UIColor lightGrayColor]) forState:UIControlStateHighlighted];
+    [btnAccept setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
+    [btnAccept setTitle:@"Accept" forState:UIControlStateNormal];
+    [btnAccept addTarget:self action:@selector(acceptbuttonpushed:) forControlEvents:UIControlEventTouchUpInside];
+    btnAccept.frame = CGRectMake(viewCenter - MARGIN_X - BUTTON_WIDTH, MARGIN_Y, BUTTON_WIDTH, 44);
+    btnAccept.layer.cornerRadius = 5;
+    btnAccept.layer.borderColor = [UIColor lightGrayColor].CGColor;
+    btnAccept.layer.borderWidth = 0.5;
+    btnAccept.clipsToBounds = true;
+    
+    
+    UIButton*btnDecline = [UIButton buttonWithType:UIButtonTypeCustom];
+    [btnDecline setBackgroundImage:createImageFromUIColor([UIColor colorWithRed:1 green:0.227 blue:0.176 alpha:1]) forState:UIControlStateNormal];
+    [btnDecline setBackgroundImage:createImageFromUIColor([UIColor colorWithRed:1 green:0.227 blue:0.176 alpha:1]) forState:UIControlStateHighlighted];
+    [btnDecline setTitleColor:[UIColor groupTableViewBackgroundColor] forState:UIControlStateNormal];
+    [btnDecline setTitle:@"Decline" forState:UIControlStateNormal];
+    [btnDecline addTarget:self action:@selector(declinebuttonpushed:) forControlEvents:UIControlEventTouchUpInside];
+    btnDecline.frame = CGRectMake(viewCenter + MARGIN_X, MARGIN_Y, BUTTON_WIDTH, 44);
+    btnDecline.layer.cornerRadius = 5;
+    btnDecline.layer.borderColor = [UIColor lightGrayColor].CGColor;
+    btnDecline.layer.borderWidth = 0.5;
+    btnDecline.clipsToBounds = true;
+
+    [self.view addSubview:btnAccept];
+    [self.view addSubview:btnDecline];
     
 
-    title_lbl = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 200, 44)];
+    title_lbl = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 300, 44)];
     title_lbl.font = [UIFont boldSystemFontOfSize:22];
     title_lbl.textAlignment = NSTextAlignmentCenter;
     title_lbl.text = [self defaultTitle];
+    title_lbl.lineBreakMode = NSLineBreakByWordWrapping;
+    title_lbl.numberOfLines = 0;
     [self.view addSubview:title_lbl];
     [title_lbl sizeToFit];
     
@@ -89,6 +121,7 @@
     description_lbl.numberOfLines = 0;
     description_lbl.font = [UIFont systemFontOfSize:16];
     description_lbl.text = [self defaultDescription];
+    description_lbl.textAlignment = NSTextAlignmentCenter;
     [self.view addSubview:description_lbl];
     
     [self viewWillLayoutSubviews];
@@ -122,26 +155,28 @@
     return @"";
 }
 
+
 -(NSString*)defaultDescription{
-    if (self.permission_description) {
-        return self.permission_description;
+    if (permission_description_) {
+        return permission_description_;
     }
     switch (type_) {
         case NFXPermissionTypeTwitter:
-            return @"If you will accept permission,this app can access twitter.";
+            return @"If you accept this permission, the app can access twitter.";
         case NFXPermissionTypeAddressBook:
-            return @"If you will accept permission,this app can access addressbook.";
+            return @"If you accept this permission, the app can access your addressbook.";
         case NFXPermissionTypeCalendar:
-            return @"If you will accept permission,this app can access calendar.";
+            return @"If you accept this permission, the app can access your calendar.";
         case NFXPermissionTypeReminder:
-            return @"If you will accept permission,this app can access reminder.";
+            return @"If you accept this permission, the app can access your reminders.";
         case NFXPermissionTypeRecord:
-            return @"If you will accept permission,this app can access microphone.";
+            return @"If you accept this permission, the app can access your microphone.";
     }
     return @"";
 }
 
--(void)buttonpushed:(UIButton*)sender{
+
+-(void)acceptbuttonpushed:(UIButton*)sender{
     switch (type_) {
         case NFXPermissionTypeTwitter:
             [self requestAccessSocial:ACAccountTypeIdentifierTwitter];
@@ -162,6 +197,12 @@
             break;
     }
 }
+
+
+-(void)declinebuttonpushed:(UIButton*)sender{
+    [self.delegate NFXPermissionViewController:self accept:FALSE];
+}
+
 
 -(void)requestRecord{
     [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
@@ -199,6 +240,8 @@
         });
     });
 }
+
+
 
 //---------------
 - (void)viewDidLoad {
